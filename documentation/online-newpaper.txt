@@ -1,0 +1,88 @@
+ONLINE NEWSPAPER
+
+1. Create User, UserSession, Role, Article, Category and Comment objects
+
+User (REQUIRES REQUEST OBJECT WITHOUT ID AND ROLES)
+id : long/integer
+username (or mail) - unique : string
+password : string
+firstName : string
+lastName : string
+list<role> roles
+
+UserSession:
+sessionId: string
+user: User
+
+Role
+ADMIN,
+READER,
+WRITER
+
+Category (may be an enum)
+POLITICS
+ECONOMY
+HI_TECH
+ISRAEL
+WORLD
+
+Comment:
+id
+body : string
+createdOn : date
+createdBy : user
+
+
+Article (REQUIRES REQUEST OBJECT WITHOUT createdOn, createdBy, id and comments):
+id
+title
+body
+createdBy : user
+createdOn : date
+List<categories> : category
+List<comment> : comment
+
+All objects have all args and no args ctors, getter and setters
+
+2. Create UserController with methods: register, login, logout, get all users, get userInfo (by ID as path variable),
+promote and demote.
+
+3. In user class - change List<string> roles onto list<roles>
+
+4. If the user in the system is the first user - ROLE_ADMIN should be granted automatically.
+All next users should be created with access level ROLE_READER
+
+5. Implement functionality for promotion and demotion. List of roles - means:
+- each URL has only one access role instead of a list of roles in WebSecurityConfiguration
+
+*** .antMatchers("/users/promote/**").hasRole("ADMIN") ***
+
+instead of
+
+*** .antMatchers("/users/promote/**").hasAnyRole("ADMIN", "WRITER", "READER") ***
+
+
+- on promotion or demotion - record all roles for the user, by default from current to lowest
+(for example, assume we have 5 roles an set the user to have role #3. It means, that list<role>
+must contain roles 1-3. On promotion to 5, user will have roles 1,2,3,4 and 5. On demotion to 2 user will have only 1 and 2)
+5.1. Add changes to WebSecurityConfiguration: set "hasRole" to promote and demote to have ADMIN access only
+
+5.1. Make sure you cannot demote the last admin user in the system.
+***PERFORMANCE BETTER, BUT NOT REQUIRED***
+5.1.1. It is strongly advised to have a different collection for admins in order to save performance.
+5.1.2. It is up to you: to save all users (including ROLE_ADMIN) in Map<string, user> users and to keep admins in a different collection
+or do not save admins in Map<string, user> users at all and keep them in a separate place.
+5.1.3. Do not forget to update UserRepository to count in the collection of admins if you save!!!
+END ***PERFORMANCE BETTER, BUT NOT REQUIRED***
+5.1.4. If you skip "PERFORMANCE BETTER" section, than just iterate thru the map of users and make a sub for-loop
+checking roles.
+
+6. promote and demote are separate methods of UserController with roles access ADMIN.
+Non-ADMIN shall not pass!! (Gandalf would say in 2018)
+6.1. You can easily check it works by:
+ 6.1.1. registering three users (first will be automatically an admin and the other will be reader - see paragraph #4).
+ 6.1.2. log in as user #2 and try to promote user #3. If you get 403 - "Access denied" - go to the next step
+ 6.1.3. log in as admin user and promote user #2 to ROLE_ADMIN. Then retry to promote user #3 to WRITER
+ 6.1.4. get all users: if you see the third user with role WRITER - it works!
+
+*** END OF PART ONE ***
