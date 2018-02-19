@@ -1,0 +1,100 @@
+Online newspaper. Part 2
+1. Create an ArticleCotnroller
+2. Controller has methods: 
+- create article
+- update article
+- delete article
+- get article by ID
+- get articles by categories
+- get articles by author first name or last name
+- get articles by title
+- add comment
+- delete comment
+
+3. Create article.
+User who has a role WRITER may execute this method.
+If the user tries to create an article against the permission rules - NoPermissionsException should be thrown.
+The request object should contain a title, a body and a list of categories.
+Server is supposed to fill in such fields as: createdOn, createdBy and id.
+RequestBody should be validated using javax.validation and hibernate validator. 
+Both fields of the request object cannot be blank.
+HTTP method: POST
+
+4. Update article
+Method receives same request object, as "create article". 
+URL path variable should be used for article identification.
+Only the author of the article and an admin may update the article.
+Other ROLE_WRITER users may not update the article, whose author they are not. 
+Otherwise - throw (create) NoPermissionsException.
+If such article does not exist - NoSuchContentException should be thrown.
+If the user tries to modify an article against the permission rules - NoPermissionsException should be thrown.
+HTTP method: PUT
+
+5. Delete article
+Method receives url path variable as a parameter.
+Article may be deleted by either its author or by an admin.
+Otherwise - throw NoPermissionsException
+If such article does not exist - NoSuchContentException should be thrown.
+If the user tries to delete an article against the permission rules - NoPermissionsException should be thrown.
+HTTP method: DELETE
+
+6. get article by ID
+Returns the entire information about the article, including ann the comments
+
+7. get articles by categories
+Methods receives a list of categories (or category ids) and returns the list of onces, that are in the category.
+
+8. get articles by author first name or last name
+Method receives either full name, or separately: first name and last name.
+Method retuns a list of all articles, that fit the requested author.
+
+
+9. get articles by title
+Method receives an article title or a part of it and retunes the list of the articles, that match the search request.
+
+All articles get methods (except get by ID) should return article wrapping object
+Returns articles' titles, author, created date, categories to which the article belongs to and first 400 characters of the body. 
+ArticlePresentationResponse
+articleId:int
+articleAuthor : string
+createdDate : date (find how to in jackson to format Date -> dd-MM-yyyy HH:mm)
+title : string
+preview: string (first 100 characters of article's body)
+----------------------------------
+
+
+10. add comment
+Any logged in user may leave a comment. 
+Url parameters should contain an article ID. If such article does not exist - NoSuhContentException should be thrown
+HTTP method: POST
+
+11. delete comment 
+Method receives comment ID and article ID as either url paramter or as request parameters. 
+Any logged in user can execute this method. 
+Comment should be deleted if: 
+- user is an admin
+- user is an author of the article
+- user is an author of the comment
+
+In all other cases - NoPermissionsException should be thrown
+
+
+EXCEPTIONS to create
+
+
+NoPermissionsException:
+status 403
+
+AuthenticationException
+status 401
+
+NoSuchContentException
+status 404
+
+InputValidationException
+status 400
+
+Create an exception handler controller, that returns all custom exceptions in a user friendly mode:
+display the correct status (both: HTTP and in JSON response)
+display the correct message
+display the time, when exception occurred in a more readable format
